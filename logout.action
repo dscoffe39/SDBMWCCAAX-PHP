@@ -1,0 +1,19 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']. "/inc_functions.php";
+Sql_Connect();
+
+$response = array();
+$response["ActiveUser"] = 1;
+
+$usrID = Sql_CleanInput($_POST['usrID']);
+$sql = "DELETE FROM `MobUsr` WHERE `MobUsr`.`UsrID` = '".$usrID."';";
+$result=Sql_Query($sql);
+$count=Sql_Affected_Rows();
+
+if($count>=1){
+	$response["ActiveUser"] = 0;
+}
+
+Sql_Disconnect();
+echo json_encode($response);
+?>
