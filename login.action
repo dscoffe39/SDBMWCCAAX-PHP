@@ -1,0 +1,56 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT']. "/inc_functions.php";
+Sql_Connect();
+
+$response = array();
+$response["ActiveUser"] = 0;
+
+$usrID = Sql_CleanInput($_POST['usrID']);
+$sql = "SELECT `Date`, `Name`, `Position` FROM `MobUsr`, `members` WHERE `MobUsr`.`MemberID` = `members`.`id` AND `MobUsr`.`UsrID` = '".$usrID."';";
+$result=Sql_Query($sql);
+$count=Sql_Num_Rows($result);
+
+if($count>=1){
+	$response["ActiveUser"] = 1;
+	$response["Name"] = Sql_Result($result,0,"Name");
+	$response["Position"] = Sql_Result($result,0,"Position");
+}
+
+
+if($_POST["login"] === "login"){
+	
+	// username and password sent from app 
+	$myusername=$_POST['myusername']; 
+	$mypassword=$_POST['mypassword']; 
+
+	// To protect MySQL injection
+	$myusername = Sql_CleanInput($myusername);
+	$mypassword = Sql_CleanInput($mypassword);
+	$salt = sha1($myusername.">B;#7yD9");
+	$myusername = md5($salt.$myusername);
+	$salt = sha1($mypassword."-(j8@gAS");
+	$mypassword = md5($salt.$mypassword);
+	$sql="SELECT * FROM members WHERE username='$myusername' and password='$mypassword'";
+	//echo $sql;
+	$result=Sql_Query($sql);
+	$count=Sql_Num_Rows($result);
+	
+	// If result matched $myusername and $mypassword, table row must be 1 row
+	if($count>=1){
+		$name =  Sql_Result($result,0,"Name");
+		$name = explode(' ',$name);
+		$name = " ".$name[0];
+		$myposition = Sql_Result($result,0,"Position");
+		$_SESSION["myusername"] = $myusername;
+		$_SESSION["myposition"] = $myposition;
+		$_SESSION["name"] = $name;
+	}
+	else {
+		echo "Wrong Username or Password.";
+		is_loggedin();
+		die();
+	}
+}
+Sql_Disconnect();
+echo json_encode($response);
+?>
