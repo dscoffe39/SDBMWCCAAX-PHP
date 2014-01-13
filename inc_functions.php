@@ -3,6 +3,71 @@ ini_set('session.bug_compat_warn', 0);
 ini_set('session.bug_compat_42', 0);
 //php function definitions
 
+function ccaaemail($subject, $message){
+	return ccaemail("Webmaster", "...", $subject, $message);
+}
+function ccaemail($name, $email, $subject, $message){ //emails from general website
+	$hmessage = $message;
+	$hmessage = '
+	<html>
+	<head>
+	  <title>SDBMWCCA Website</title>
+	  <link rel="shortcut icon" href="..." />
+	  <link rel="stylesheet" href=".." type="text/css" />
+	</head>
+	<body>
+	  <div id="top-logo" >
+		<img src="..." width="165" height="165" alt="San Diego BMW CCA logo" /><img src="..." width="700" height="165" alt="San Diego Bay with BMWs" />
+	  </div>
+		<div id="calendar">
+		<p><strong>
+		'.$hmessage.'
+		</strong></p>
+		</div>
+		<div id="bottom-info">
+		<table width="100%" border="0" cellpadding="5px">
+		  <tr>
+			<th scope="col"><a href="..." target="_new"><img src="..." alt="Like us on Facebook" /></a></th>
+			<th scope="col"><a href="..." target="_new"><img src="..." alt="Follow sdbmw on Twitter" height="35"/></a></th>
+		  </tr>
+		</table>
+	  </div>
+		<div id="bottom-logo" >
+		<img src="..." alt="" />
+	  </div>
+	</body>
+	</html>
+	';
+	$args = array(
+		'key' => '...',
+		'message' => array(
+			"html" => $hmessage,
+			"text" => $message,
+			"from_email" => "...",
+			"from_name" => "...",
+			"subject" => $subject,
+			"to" => array(array("email" => $email, "name" => $name)),
+			"track_opens" => true,
+			"track_clicks" => true,
+			"auto_text" => true
+		)
+	);
+
+	$curl = curl_init('https://mandrillapp.com/api/1.0/messages/send.json' );
+	curl_setopt($curl, CURLOPT_POST, true);
+	curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($curl, CURLOPT_HEADER, false);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+	curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($args));
+	$response = curl_exec($curl);
+	curl_close( $curl ); 
+
+	if(strpos($response,"sent") != false)
+		return true;
+	else
+		return false;
+}
 
 ////////////////////////////////////DATABASE FUNCTIONS
 //currently using mysqli, but all db interaction occurs via these functions, allowing any abstraction layer to be easily implemented. 
